@@ -1,0 +1,20 @@
+#api:
+#  dashboard: true
+
+entryPoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"
+  buildbot:
+    address: ":9989"
+
+providers:
+  docker:
+    endpoint: "tcp://socket-proxy:2375"
+    watch: true
+    exposedByDefault: false
+
+  file:
+    directory: "/etc/traefik/conf/"
+

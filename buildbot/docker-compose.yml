@@ -1,0 +1,80 @@
+version: '3'
+services:
+  buildbot-buildmaster:
+    image: buildbot/buildbot-master:master
+    restart: unless-stopped
+    env_file:
+      - ./db.env
+      - ./multiarch.env
+      - ../windows/windows.env
+      - ../raspberry-pi/armv6/armv6.env
+      - ../raspberry-pi/armv7/armv7.env
+      - ../raspberry-pi/armv8/armv8.env
+      - ../raspberry-pi/arm64v8/arm64v8.env
+    environment:
+      - BUILDBOT_CONFIG_DIR=config
+      - BUILDBOT_WORKER_PORT=9989
+      - BUILDBOT_WEB_URL=https://mendel.fh-salzburg.ac.at/
+      - BUILDBOT_WEB_PORT=tcp:port=80
+      - BUILDBOT_TITLE=datacompressor testing
+      - BUILDBOT_TITLE_URL=https://github.com/CenterForSecureEnergyInformatics
+    volumes:
+        - ./secrets/:/var/lib/buildbot/secrets
+        - ./master.cfg:/var/lib/buildbot/master.cfg
+    networks:
+      - proxy
+      - buildbot
+    ports:
+      - 10.10.41.44:9988:9989
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+
+      - "traefik.http.routers.buildbot.rule=Host(`mendel.fh-salzburg.ac.at`)"
+      - "traefik.http.routers.buildbot.entrypoints=http"
+      - "traefik.http.routers.buildbot.middlewares=redirect-to-https@file"
+
+      - "traefik.http.routers.buildbot-secure.rule=Host(`mendel.fh-salzburg.ac.at`)"
+      - "traefik.http.routers.buildbot-secure.entrypoints=https"
+      - "traefik.http.routers.buildbot-secure.service=buildbot"
+      - "traefik.http.routers.buildbot-secure.tls=true"
+      - "traefik.http.routers.buildbot-secure.tls.certresolver=http"
+      - "traefik.http.routers.buildbot-secure.middlewares=hsts-header@file"
+
+      - "traefik.http.services.buildbot.loadbalancer.server.port=80"
+
+      - "traefik.tcp.routers.buildbot.rule=HostSNI(`mendel.fh-salzburg.ac.at`)"
+      - "traefik.tcp.routers.buildbot.entrypoints=buildbot"
+      - "traefik.tcp.routers.buildbot.service=buildbot"
+      - "traefik.tcp.routers.buildbot.tls=true"
+
+      - "traefik.tcp.services.buildbot.loadbalancer.server.port=9989"
+  db:
+    env_file:
+      - db.env
+    image: "postgres:9.4"
+    restart: unless-stopped
+    volumes:
+      - /data/buildbot/db:/var/lib/postgresql/data
+    networks:
+      - buildbot
+
+  worker:
+    build:
+      context: .
+      dockerfile: multiarch_dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./multiarch.env
+    environment:
+      BUILDMASTER: buildbot-buildmaster
+      BUILDMASTER_PORT: 9989
+    networks:
+      - buildbot
+
+networks:
+  proxy:
+    external: true
+  buildbot:
+    external: false
+
