@@ -45,10 +45,10 @@ For each platform/architecture a scheduler is defined in this configuration.
 Builders are assigned to jobs (defined by factories).
 Finally, schedulers trigger builds on the actual workers.
 
-For a detailed overview, plese refer to http://docs.buildbot.net/latest/manual/introduction.html
+For a detailed overview, please refer to http://docs.buildbot.net/latest/manual/introduction.html
 
 ## Setup / Configuration
-The file master.cfg is the main config file of buildbot, docker-compose.yml handles all services involved.
+The file master.cfg is the main configuration file of buildbot, docker-compose.yml handles all services involved.
 ### master.cfg
 Everything is pre-configured in this setup and does not require much changes.
 Please refer to http://docs.buildbot.net/latest/manual/configuration/ for details, as a detailed explanation is beyond the scope of this README.

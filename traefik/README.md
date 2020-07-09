@@ -1,7 +1,7 @@
 # Reverse Proxy (traefik)
 This folder contains the configuration for the reverse proxy in front of the buildbot buildmaster.
 The proxy handles tls connections and automatically redirects from port 80 to port 443.
-Furtermore, it listens on port 9989 and provides a tls connection for buildbot-workers to the buildmaster.
+Furthermore, it listens on port 9989 and provides a tls connection for buildbot-workers to the buildmaster.
 
 The services behind traefik reside in private networks, only the ports needed are exposed to the internet.
 
@@ -31,14 +31,13 @@ Run the following steps in this order:
 To view logs in realtime, run
 - docker-compose logs -f
 
-Exit with CRTL+C
+Exit with CTRL+C
 
 ## Setup / Configuration
 Traefik has a static configuration (docker-compose.yml and traefik.yml) and a dynamic configuration (folders certs and dynamic)
 Everything is preconfigured, so no action is required.
 The only thing to keep in mind is to renew the certificates, located in certs (please refer to the README in this folder).
-Traefik could handle renewals by itself when using letsencrypt, but in this setup wie specified a certificate manually.
+Traefik could handle renewals by itself when using letsencrypt, but in this setup we specified a certificate manually.
 
 The services handled by traefik are configured via labels in the corresponding docker-compose.yml files, in our case ../buildbot/docker-compose.yml, so please have a look there
 
-## 
